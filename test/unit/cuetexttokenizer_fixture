@@ -1,6 +1,7 @@
 #ifndef __WEBVTT_TEST_CUETOKENIZER_FIXTURE__
 # define __WEBVTT_TEST_CUETOKENIZER_FIXTURE__
 #include <gtest/gtest.h>
+#include <cassert>
 extern "C" {
 #include <webvtt/cuetext_internal.h>
 }
@@ -43,7 +44,9 @@ class CueTextTokenizerTest : public ::testing::Test
     }
 
     webvtt_uint currentCharPos() {
-      return pos - start;
+      assert(start <= pos);
+      auto result = pos - start;
+      return static_cast<webvtt_uint>(result);
     }
 
   protected:

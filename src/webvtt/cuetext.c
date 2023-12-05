@@ -708,7 +708,7 @@ webvtt_parse_cuetext( webvtt_parser self, webvtt_cue *cue,
    * http://dev.w3.org/html5/webvtt/#webvtt-cue-text-parsing-rules
    */
   while( *position != '\0' ) {
-    webvtt_status status = WEBVTT_SUCCESS;
+    status = WEBVTT_SUCCESS;
     webvtt_delete_token( &token );
 
     /* Step 7. */

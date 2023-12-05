@@ -8,12 +8,12 @@ using namespace WebVTT;
  */
 const char UTF8AnNyungHaSeYo[] =
 {
-  0xEC, 0x95, 0x88, /* U+C548 */
-  0xEB, 0x85, 0x95, /* U+B155 */
-  0xED, 0x95, 0x98, /* U+D558 */
-  0xEC, 0x84, 0xB8, /* U+C138 */
-  0xEC, 0x9A, 0x94, /* U+C694 */
-  0x00              /* NULL */
+  '\xEC', '\x95', '\x88', /* U+C548 */
+  '\xEB', '\x85', '\x95', /* U+B155 */
+  '\xED', '\x95', '\x98', /* U+D558 */
+  '\xEC', '\x84', '\xB8', /* U+C138 */
+  '\xEC', '\x9A', '\x94', /* U+C694 */
+  '\x00'                  /* NULL */
 };
 
 /**
@@ -24,7 +24,7 @@ const webvtt_uint16 UTF16AnNyungHaSeYo[] =
   0xC548, 0xB155, 0xD558, 0xC138, 0xC694, 0x0000
 };
 
-const char UTF8ReplacementChar[] = { 0xEF, 0xBF, 0xBD };
+const char UTF8ReplacementChar[] = { '\xEF', '\xBF', '\xBD' };
 
 TEST(String,CreateWithTextStrlen)
 {
@@ -339,7 +339,7 @@ TEST(String,IsEmptyCXX)
 TEST(String,Replace)
 {
   char conststr[3] = {0,0,0};
-  char expectedOutput[] = { 0xEF, 0xBF, 0xBD, 0, 0, 0 };
+  char expectedOutput[] = { '\xEF', '\xBF', '\xBD', 0, 0, 0 };
   webvtt_string str;
   ASSERT_EQ( WEBVTT_SUCCESS, webvtt_create_string_with_text( &str, conststr,
                                                              3 ) );
@@ -373,7 +373,7 @@ TEST(String,ReplaceStrlen)
 TEST(String,ReplaceAll)
 {
   char conststr[] = "\0a\0b";
-  char expectedOutput[] = { 0xEF, 0xBF, 0xBD, 'a', 0xEF, 0xBF, 0xBD, 'b', 0 };
+  char expectedOutput[] = { '\xEF', '\xBF', '\xBD', 'a', '\xEF', '\xBF', '\xBD', 'b', 0 };
   webvtt_string str;
   ASSERT_EQ( WEBVTT_SUCCESS, webvtt_create_string_with_text( &str, conststr,
                                                              4 ) );

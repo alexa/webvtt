@@ -73,7 +73,7 @@ public:
   ~Node() { webvtt_release_node( &node ); }
 
   bool isEmpty() const { return kind() == Empty; }
-  NodeKind kind() const { return (NodeKind)node->kind; }
+  NodeKind kind() const { return static_cast<NodeKind>(node->kind); }
   int childCount() const { return node->data.internal_data->length; }
 
   Node operator[]( int index )

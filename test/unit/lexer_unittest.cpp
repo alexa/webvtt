@@ -21,11 +21,11 @@ public:
 
   webvtt_token lex_newline( const std::string &str, webvtt_uint &pos,
                             bool finished = true ) {
-    return webvtt_lex_newline( self, str.c_str(), &pos, str.size(), finished );
+    return webvtt_lex_newline( self, str.c_str(), &pos, static_cast<webvtt_uint>(str.size()), finished );
   }
 
   webvtt_token lex( const std::string &str, webvtt_uint &pos, bool finished = true ) {
-    return ::webvtt_lex( self, str.c_str(), &pos, str.size(), finished );
+    return ::webvtt_lex( self, str.c_str(), &pos, static_cast<webvtt_uint>(str.size()), finished );
   }
 
   webvtt_lexer_state lexerState() const {

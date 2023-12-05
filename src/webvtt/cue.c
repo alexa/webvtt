@@ -194,7 +194,7 @@ webvtt_cue_set_line( webvtt_cue *cue, const char *value )
     return WEBVTT_BAD_LINE;
   }
 
-  if( ( c = strchr( value, '%' ) ) && ( ( c[1] != '\0' ) || *value == '-' ) ) {
+  if( (( c = strchr( value, '%' ) ) != NULL) && ( ( c[1] != '\0' ) || *value == '-' ) ) {
     /**
      * 4. If any character in value other than the last character is a U+0025
      * PERCENT SIGN character (%), then jump to the step labeled next setting.
@@ -279,7 +279,7 @@ webvtt_cue_set_position( webvtt_cue *cue, const char *value )
    * 3. If any character in value other than the last character is a U+0025
    * PERCENT SIGN character (%), then jump to the step labeled next setting.
    */
-  if( ( c = strchr( value, '%' ) ) && ( c[1] != '\0' ) ) {
+  if( (( c = strchr( value, '%' ) ) != NULL) && ( c[1] != '\0' ) ) {
     return WEBVTT_BAD_POSITION;
   }
 
@@ -351,7 +351,7 @@ webvtt_cue_set_size( webvtt_cue *cue, const char *value )
    * 3. If any character in value other than the last character is a U+0025
    * PERCENT SIGN character (%), then jump to the step labeled next setting.
    */
-  if( ( c = strchr( value, '%' ) ) && ( c[1] != '\0' ) ) {
+  if( (( c = strchr( value, '%' ) ) != NULL) && ( c[1] != '\0' ) ) {
     return WEBVTT_BAD_SIZE;
   }
 
@@ -470,7 +470,7 @@ webvtt_cue_set_setting_from_string( webvtt_cue *cue, const char *word )
     return WEBVTT_BAD_CUESETTING;
   }
 
-  idx = ( value - word ) - 1;
+  idx = (int)(( value - word ) - 1);
   if( idx > 31 ) {
     return WEBVTT_BAD_CUESETTING;
   }
@@ -495,8 +495,8 @@ webvtt_cue_validate_set_settings( webvtt_parser self, webvtt_cue *cue,
     return WEBVTT_INVALID_PARAM;
   }
   length = (int)webvtt_string_length( settings );
-  if( ( eol = strchr( webvtt_string_text( settings ), '\r' ) )
-      || ( eol = strchr( webvtt_string_text( settings ), '\n' ) ) ) {
+  if( (( eol = strchr( webvtt_string_text( settings ), '\r' ) ) != NULL)
+      || (( eol = strchr( webvtt_string_text( settings ), '\n' ) ) != NULL) ) {
     length = (int)( eol - webvtt_string_text( settings ) );
   }
 

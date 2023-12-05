@@ -26,6 +26,8 @@
  */
 
 #include "string_internal.h"
+#include <assert.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -62,6 +64,14 @@ memmem(const void *l, size_t l_len, const void *s, size_t s_len)
     }
   }
   return NULL;
+}
+
+static int
+checked_strlen(const char* s)
+{
+  size_t l = strlen(s);
+  assert(l <= INT_MAX);
+  return (int)l;
 }
 
 static webvtt_string_data empty_string = {
@@ -130,7 +140,7 @@ webvtt_create_string_with_text( webvtt_string *out, const char *init_text,
   }
 
   if( len < 0 ) {
-    len = strlen( init_text );
+    len = checked_strlen(init_text);
   }
 
   /**
@@ -279,7 +289,7 @@ grow( webvtt_string *str, webvtt_uint need )
   }
 
   p = d = str->d;
-  grow = sizeof( *d ) + ( sizeof( char ) * ( d->length + need ) );
+  grow = (webvtt_uint32)sizeof(*d) + ((webvtt_uint32)sizeof(char) * (d->length + need));
 
   if( grow < page ) {
     n = page;
@@ -342,13 +352,19 @@ webvtt_string_getline( webvtt_string *src, const char *buffer,
   /* This had better be a valid string_data, or else NULL. */
   d = str->d;
   if( !str->d ) {
-    if(WEBVTT_FAILED(webvtt_create_string( 0x100, str ))) {
+    /**
+     * Checking if str->d != NULL helps the code analyzer to understand
+     * that str->d is not null after calling webvtt_create_string.
+     * And it will not complain on possible null pointer dereference
+     * when accessing d->length below.
+     */
+    if(WEBVTT_FAILED(webvtt_create_string( 0x100, str )) || !str->d) {
       return -1;
     }
     d = str->d;
   }
   if( len < 0 ) {
-    len = strlen( buffer );
+    len = checked_strlen( buffer );
   }
   n = buffer + len;
 
@@ -414,7 +430,7 @@ webvtt_string_is_equal( const webvtt_string *str, const char *to_compare,
   }
 
   if( len < 0 ) {
-    len = strlen( to_compare );
+    len = checked_strlen(to_compare);
   }
 
   if( str->d->length != (unsigned)len ) {
@@ -434,10 +450,18 @@ webvtt_string_append( webvtt_string *str, const char *buffer, int len )
   }
   if( !str->d ) {
     webvtt_init_string( str );
+    /**
+     * Help static code analyzer to understand that str->d is not null
+     * and the later access to str->d->length will not cause
+     * null pointer dereference.
+     */
+    if (!str->d) {
+      return WEBVTT_FAILED_ASSERTION;
+    }
   }
 
   if( len < 0 ) {
-    len = strlen( buffer );
+    len = checked_strlen( buffer );
   }
 
   if( len == 0 ) {
@@ -475,15 +499,15 @@ webvtt_string_replace( webvtt_string *str, const char *search, int search_len,
   }
 
   if( search_len < 0 ) {
-    search_len = ( int )strlen( search );
+    search_len = checked_strlen( search );
   }
 
   if( replace_len < 0 ) {
-    replace_len = ( int )strlen( replace );
+    replace_len = checked_strlen( replace );
   }
 
   if( ( p = (char *)memmem( str->d->text, str->d->length, search,
-                            search_len ) ) ) {
+                            search_len ) ) != NULL ) {
     const char *end;
     size_t pos = p - str->d->text;
     if( WEBVTT_FAILED( status = grow( str, replace_len ) ) ) {
@@ -519,11 +543,11 @@ webvtt_string_replace_all( webvtt_string *str, const char *search,
   }
 
   if( search_len < 0 ) {
-    search_len = ( int )strlen( search );
+    search_len = checked_strlen( search );
   }
 
   if( replace_len < 0 ) {
-    replace_len = ( int )strlen( replace );
+    replace_len = checked_strlen( replace );
   }
 
   while( ( status = webvtt_string_replace( str, search, search_len, replace,
@@ -796,7 +820,7 @@ webvtt_utf8_to_utf16( const char *utf8, const char *end,
         uc = ( uc << 6 ) | ( ch & 0x3F );
         if (!--need) {
           int nc;
-          if ( !( nc = UTF_IS_NONCHAR( uc ) ) && uc > 0xFFFF && uc < 0x110000) {
+          if ( (( nc = UTF_IS_NONCHAR( uc ) ) == 0) && uc > 0xFFFF && uc < 0x110000) {
             /* Surrogate pair */
             if( high_surrogate ) {
               *high_surrogate = UTF_HIGH_SURROGATE( uc );
@@ -807,8 +831,9 @@ webvtt_utf8_to_utf16( const char *utf8, const char *end,
             /* Non-character, overlong sequence, or utf16 surrogate */
             return 0xFFFD;
           } else {
+            assert((webvtt_uint16)uc == uc);
             /* Non-surrogate */
-            return uc;
+            return (webvtt_uint16)uc;
           }
         }
       }

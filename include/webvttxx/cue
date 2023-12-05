@@ -126,7 +126,7 @@ public:
   }
 
   inline Direction direction() const {
-    return (Direction)cue->settings.vertical;
+    return static_cast<Direction>(cue->settings.vertical);
   }
   inline float relativeLinePosition() const {
     return ( 1.f / 100.f ) * static_cast<float>(
@@ -138,14 +138,14 @@ public:
   }
   inline int lineNumber() const { return cue->settings.line; }
   inline float textPosition() const {
-    return ( 1.f / 100.f ) * (float)cue->settings.position;
+    return static_cast<float>(( 1.0 / 100.0 ) * cue->settings.position);
   }
   inline uint textPositionPercentage() const { return cue->settings.position; }
   inline float size() const {
-    return ( 1.f / 100.f ) * (float)cue->settings.size;
+    return static_cast<float>(( 1.0 / 100.0 ) * cue->settings.size);
   }
   inline uint sizePercentage() const { return cue->settings.size; }
-  inline Align alignment() const { return (Align)(cue->settings.align); }
+  inline Align alignment() const { return static_cast<Align>(cue->settings.align); }
 
   inline bool isHorizontal() const { return orientation() == Horizontal; }
   inline bool isVertical() const { return orientation() == Vertical; }

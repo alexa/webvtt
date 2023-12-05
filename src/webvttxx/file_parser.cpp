@@ -43,32 +43,37 @@ FileParser::FileParser( const char *fPath )
 
 FileParser::~FileParser()
 {
-  if( reader.is_open() ) {
-    reader.close();
+  try {
+    if( reader.is_open() ) {
+      reader.close();
+    }
+  }
+  catch (...) {
   }
 }
 
 bool
 FileParser::parse()
 {
-  bool final = false;
-  ::webvtt_status status;
-  ::webvtt_status finishStatus;
-  char buffer[0x1000];
   if( !reader.good() ) {
     return false;
   }
 
-  do {
-    reader.read( buffer, sizeof buffer );
-    uint len = (uint)reader.gcount();
-    final = reader.eof();
-    status = parseChunk( buffer, len );
-  } while( !final && !WEBVTT_FAILED(status) );
-  if( status == WEBVTT_UNFINISHED ) {
-    status = WEBVTT_SUCCESS;
-  }
-  finishStatus = finishParsing();
+  const ::webvtt_status status = [this] {
+    char buffer[0x1000];
+    bool final = false;
+    ::webvtt_status status = WEBVTT_FAIL;
+    do
+    {
+      reader.read( buffer, sizeof buffer );
+      const uint len = static_cast<uint>(reader.gcount());
+      final = reader.eof();
+      status = parseChunk( buffer, len );
+    } while( !final && !WEBVTT_FAILED(status) );
+    return ( status == WEBVTT_UNFINISHED ) ? WEBVTT_SUCCESS : status;
+  }();
+
+  const ::webvtt_status finishStatus = finishParsing();
   return !( WEBVTT_FAILED(status) || WEBVTT_FAILED(finishStatus) );
 }
 

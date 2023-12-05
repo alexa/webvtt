@@ -47,8 +47,8 @@ webvtt_ref_node( webvtt_node *node )
 WEBVTT_EXPORT void
 webvtt_init_node( webvtt_node **node )
 {
-  if( *node != &empty_node ) {
-    if( node && *node ) {
+  if( node && *node != &empty_node ) {
+    if( *node ) {
       webvtt_release_node( node );
     }
     *node = &empty_node;
@@ -66,7 +66,7 @@ webvtt_create_node( webvtt_node **node, webvtt_node_kind kind,
     return WEBVTT_INVALID_PARAM;
   }
 
-  if( !( temp_node = (webvtt_node *)webvtt_alloc0(sizeof(*temp_node)) ) )
+  if( ( temp_node = (webvtt_node *)webvtt_alloc0(sizeof(*temp_node)) ) == NULL )
   {
     return WEBVTT_OUT_OF_MEMORY;
   }
@@ -92,8 +92,8 @@ webvtt_create_internal_node( webvtt_node **node, webvtt_node *parent,
     return status;
   }
 
-  if ( !( node_data =
-         (webvtt_internal_node_data *)webvtt_alloc0( sizeof(*node_data) ) ) )
+  if ( ( node_data =
+         (webvtt_internal_node_data *)webvtt_alloc0( sizeof(*node_data) ) ) == NULL )
   {
     return WEBVTT_OUT_OF_MEMORY;
   }

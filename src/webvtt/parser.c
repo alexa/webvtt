@@ -58,7 +58,7 @@ webvtt_create_parser( webvtt_cue_fn on_read,
     return WEBVTT_INVALID_PARAM;
   }
 
-  if( !( p = ( webvtt_parser )webvtt_alloc0( sizeof * p ) ) ) {
+  if( ( p = ( webvtt_parser )webvtt_alloc0( sizeof * p ) ) == NULL ) {
     return WEBVTT_OUT_OF_MEMORY;
   }
 
@@ -303,7 +303,7 @@ do_push( webvtt_parser self, webvtt_uint token, webvtt_uint back,
 {
   if( STACK_SIZE + 1 >= self->stack_alloc ) {
     webvtt_state *stack =
-        ( webvtt_state * )webvtt_alloc0( sizeof( webvtt_state ) *
+        ( webvtt_state * )webvtt_alloc0( (webvtt_uint)sizeof( webvtt_state ) *
                                          ( self->stack_alloc << 1 ) ), *tmp;
     if( !stack ) {
       ERROR( WEBVTT_ALLOCATION_FAILED );
@@ -495,6 +495,7 @@ WEBVTT_INTERN webvtt_status
 webvtt_proc_cueline( webvtt_parser self, webvtt_cue *cue,
                      webvtt_string *line )
 {
+  SAFE_ASSERT( cue != NULL );
   const char *text;
   webvtt_uint length;
   DIE_IF( line == NULL );
@@ -580,7 +581,7 @@ parse_webvtt( webvtt_parser self, const char *buffer, webvtt_uint *ppos,
       if( SP->flags == 0 ) {
         int v;
         if( ( v = webvtt_string_getline( &SP->v.text, buffer, &pos, len, 0,
-                                         finish ) ) ) {
+                                         finish ) ) != 0 ) {
           if( v < 0 ) {
             webvtt_release_string( &SP->v.text );
             SP->type = V_NONE;
@@ -604,9 +605,9 @@ parse_webvtt( webvtt_parser self, const char *buffer, webvtt_uint *ppos,
         }
       }
       if( SP->flags ) {
-        webvtt_token token = webvtt_lex_newline( self, buffer, &pos, len,
+        webvtt_token t = webvtt_lex_newline( self, buffer, &pos, len,
                                                  self->finished );
-        if( token == NEWLINE ) {
+        if( t == NEWLINE ) {
           POP();
           continue;
         }
@@ -712,6 +713,7 @@ _recheck:
              * T_BODY state.
              */
             POPBACK();
+            SP->state = T_BODY;
             PUSH0( T_EOL, 1, V_INTEGER );
             break;
           default:
@@ -840,7 +842,7 @@ webvtt_read_cuetext( webvtt_parser self, const char *b,
   webvtt_cue *cue;
 
   /* Ensure that we have a cue to work with */
-  SAFE_ASSERT( self->top->type = V_CUE );
+  SAFE_ASSERT( self->top->type == V_CUE );
   cue = self->top->v.cue;
 
   /**
@@ -857,7 +859,7 @@ webvtt_read_cuetext( webvtt_parser self, const char *b,
     if( !flags ) {
       int v;
       if( ( v = webvtt_string_getline( &self->line_buffer, b, &pos, len,
-                                       &self->truncate, finish ) ) ) {
+                                       &self->truncate, finish ) ) != 0 ) {
         if( v < 0 || WEBVTT_FAILED( webvtt_string_putc( &self->line_buffer,
                                                         '\n' ) ) ) {
           ERROR( WEBVTT_ALLOCATION_FAILED );
@@ -882,6 +884,7 @@ webvtt_read_cuetext( webvtt_parser self, const char *b,
         self->token_pos = 0;
         self->line++;
 
+        SAFE_ASSERT(self->line_buffer.d);
         /* Remove the '\n' that we appended to determine that we're in state 1
          */
         self->line_buffer.d->text[ --self->line_buffer.d->length ] = 0;
@@ -1062,7 +1065,7 @@ webvtt_parse_int( const char **pb, int *pdigits )
       /**
        * Digit character, carry on
        */
-      result = result * 10 + ( ch - '0' );
+      result = result * 10 + ( (webvtt_int64)ch - '0' );
       ++digits;
     } else if( mul == 1 && digits == 0 && ch == '-' ) {
       mul = -1;

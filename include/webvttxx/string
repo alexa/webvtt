@@ -115,12 +115,12 @@ public:
   }
 
   static uint32 toUtf32( uint16 low, uint16 high ) {
-    return (( uint32 )high << 10) + low - 0x35FDC00;
+    return ( high << uint32{ 10 }) + low - 0x35FDC00;
   }
 
   static uint32 toUtf32( uint16 ch ) {
     if( !isSurrogate( ch ) ) {
-      return ( uint32 )ch;
+      return ch;
     }
     return 0xFFFD;
   }
@@ -139,7 +139,7 @@ public:
 
   /* Count of Unicode codepoints in string */
   inline uint charCount() const {
-    return (uint)webvtt_utf8_chcount( utf8(), utf8() + length() );
+    return static_cast<uint>(webvtt_utf8_chcount( utf8(), utf8() + length() ));
   }
 
   inline String &append( char ch, webvtt_status &result ) {

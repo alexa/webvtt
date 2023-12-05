@@ -68,7 +68,7 @@ AbstractParser::__parsedCue( void *userdata, webvtt_cue *pcue )
    */
   webvtt_release_cue( &pcue );
 
-  AbstractParser *self = reinterpret_cast<AbstractParser *>( userdata );
+  AbstractParser *self = static_cast<AbstractParser *>( userdata );
   self->parsedCue( cue );
 }
 
@@ -76,7 +76,7 @@ int WEBVTT_CALLBACK
 AbstractParser::__reportError( void *userdata, webvtt_uint line,
                                webvtt_uint col, webvtt_error error )
 {
-  AbstractParser *self = reinterpret_cast<AbstractParser *>( userdata );
+  AbstractParser *self = static_cast<AbstractParser *>( userdata );
   Error err( line, col, error );
   if( !self->reportError( err ) ) {
     return -1;

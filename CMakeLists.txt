@@ -18,7 +18,10 @@ if (BUILD_LIBRARY)
 endif (BUILD_LIBRARY)
 
 add_subdirectory("src")
-if (NOT MSVC)
-  # There are linking errors when building tests under MSVC right now.
-  add_subdirectory("test")
-endif (NOT MSVC)
+
+if (MSVC)
+  # On Windows gtest uses Static CRT by default. This option fixes linking problems.
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+endif (MSVC)
+
+add_subdirectory("test")
